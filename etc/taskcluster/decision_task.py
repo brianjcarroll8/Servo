@@ -46,6 +46,7 @@ def tasks(task_for):
             "try": all_tests,
             "try-taskcluster": [
                 # Add functions here as needed, in your push to that branch
+                linux_nightly
             ],
             "master": [
                 upload_docs,
@@ -415,12 +416,12 @@ def linux_nightly():
         linux_build_task("Nightly build and upload")
         .with_treeherder("Linux x64", "Nightly")
         .with_features("taskclusterProxy")
-        .with_scopes("secrets:get:project/servo/s3-upload-credentials")
+#        .with_scopes("secrets:get:project/servo/s3-upload-credentials")
         # Not reusing the build made for WPT because it has debug assertions
         .with_script(
             "./mach build --release",
             "./mach package --release",
-            "./mach upload-nightly linux --secret-from-taskcluster",
+#            "./mach upload-nightly linux --secret-from-taskcluster",
         )
         .with_artifacts("/repo/target/release/servo-tech-demo.tar.gz")
         .find_or_create("build.linux_x64_nightly" + CONFIG.tree_hash())
