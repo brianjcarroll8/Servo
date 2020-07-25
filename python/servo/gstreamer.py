@@ -54,6 +54,7 @@ GSTREAMER_PLUGINS = [
     ("gstplayback", "gst-plugins-base"),
     ("gstproxy", "gst-plugins-bad"),
     ("gstrtp", "gst-plugins-good"),
+    ("gstrtpmanager", "gst-plugins-good"),
     ("gsttheora", "gst-plugins-base"),
     ("gsttypefindfunctions", "gst-plugins-base"),
     ("gstvideoconvert", "gst-plugins-base"),
@@ -73,6 +74,8 @@ WINDOWS_PLUGINS = [
 
 MACOS_PLUGINS = [
     ("gstapplemedia", "gst-plugins-bad"),
+    ("gstosxaudio", "gst-plugins-good"),
+    ("gstosxvideo", "gst-plugins-good"),
 ]
 
 NON_UWP_PLUGINS = [
@@ -82,6 +85,7 @@ NON_UWP_PLUGINS = [
     "gstopengl",
     "gstopus",
     "gstrtp",
+    "gstrtpmanager",
     "gsttheora",
     "gstvorbis",
     "gstvpx",
