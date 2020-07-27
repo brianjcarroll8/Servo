@@ -126,7 +126,7 @@ def macos_plugins():
             "lib",
             "gstreamer-1.0",
             "lib" + name + ".so"
-        ) for name, path in GSTREAMER_PLUGINS
+        ) for name, path in GSTREAMER_PLUGINS + MACOS_PLUGINS
     ]
 
 
