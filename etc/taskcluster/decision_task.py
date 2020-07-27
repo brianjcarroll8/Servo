@@ -55,7 +55,7 @@ def tasks(task_for):
             # The "try-*" keys match those in `servo_try_choosers` in Homu’s config:
             # https://github.com/servo/saltfs/blob/master/homu/map.jinja
 
-            "try-mac": [macos_unit],
+            "try-mac": [macos_nightly],
             "try-linux": [linux_tidy_unit, linux_docs_check, linux_release],
             "try-windows": [windows_unit, windows_arm64, windows_uwp_x64],
             "try-arm": [windows_arm64],
@@ -445,15 +445,15 @@ def macos_nightly():
         macos_build_task("Nightly build and upload")
         .with_treeherder("macOS x64", "Nightly")
         .with_features("taskclusterProxy")
-        .with_scopes(
-            "secrets:get:project/servo/s3-upload-credentials",
-            "secrets:get:project/servo/github-homebrew-token",
-        )
+        #.with_scopes(
+        #    "secrets:get:project/servo/s3-upload-credentials",
+        #    "secrets:get:project/servo/github-homebrew-token",
+        #)
         .with_script(
             "./mach build --release",
             "./mach package --release",
             "./etc/ci/macos_package_smoketest.sh target/release/servo-tech-demo.dmg",
-            "./mach upload-nightly mac --secret-from-taskcluster",
+            #"./mach upload-nightly mac --secret-from-taskcluster",
         )
         .with_artifacts("repo/target/release/servo-tech-demo.dmg")
         .find_or_create("build.mac_x64_nightly." + CONFIG.tree_hash())
