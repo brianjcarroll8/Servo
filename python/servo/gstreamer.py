@@ -37,6 +37,7 @@ NON_UWP_DYLIBS = [
 
 GSTREAMER_PLUGINS = [
     ("gstapp", "gst-plugins-base"),
+    ("gstaudiobuffersplit", "gst-plugins-bad"),
     ("gstaudioconvert", "gst-plugins-base"),
     ("gstaudiofx", "gst-plugins-good"),
     ("gstaudioparsers", "gst-plugins-good"),
