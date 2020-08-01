@@ -37,9 +37,11 @@ def tasks(task_for):
             windows_uwp_x64,
             macos_unit,
             linux_wpt,
+            linux_wpt_asan,
             linux_wpt_layout_2020,
             linux_release,
             macos_wpt,
+            macos_wpt_asan,
         ]
         by_branch_name = {
             "auto": all_tests,
@@ -56,7 +58,8 @@ def tasks(task_for):
             # https://github.com/servo/saltfs/blob/master/homu/map.jinja
 
             "try-mac": [macos_unit],
-            "try-linux": [linux_tidy_unit, linux_docs_check, linux_release],
+            #"try-linux": [linux_wpt_asan, macos_wpt_asan],
+            "try-linux": [macos_wpt_asan],
             "try-windows": [windows_unit, windows_arm64, windows_uwp_x64],
             "try-arm": [windows_arm64],
             "try-wpt": [linux_wpt],
@@ -96,6 +99,7 @@ def tasks(task_for):
         macos_nightly()
         update_wpt()
         uwp_nightly()
+        macos_wpt_asan()
 
 
 ping_on_daily_task_failure = "SimonSapin, nox, emilio"
@@ -484,26 +488,42 @@ def update_wpt():
     )
 
 
-def macos_release_build_with_debug_assertions(priority=None):
+def macos_release_build_with_debug_assertions(priority=None, asan_target=None):
+    if asan_target:
+        name_prefix = "ASAN "
+        build_args = "--with-asan"
+        index_key_suffix = "_asan"
+        treeherder_prefix = "asan-"
+        target_dir = "target/" + asan_target
+    else:
+        name_prefix = ""
+        build_args = ""
+        index_key_suffix = ""
+        treeherder_prefix = ""
+        target_dir = "target"
+
     return (
-        macos_build_task("Release build, with debug assertions")
-        .with_treeherder("macOS x64", "Release+A")
+        macos_build_task(name_prefix + "Release build, with debug assertions")
+        .with_treeherder("macOS x64", treeherder_prefix + "Release+A")
         .with_priority(priority)
         .with_script("\n".join([
-            "./mach build --release --verbose --with-debug-assertions",
+            "./mach build --release --verbose %s --with-debug-assertions" % build_args,
             "./etc/ci/lockfile_changed.sh",
-            "tar -czf target.tar.gz" +
-            " target/release/servo" +
-            " target/release/*.so" +
-            " target/release/*.dylib" +
-            " resources",
+            "tar -czf target.tar.gz"
+            " {target}/release/servo"
+            " {target}/release/*.so"
+            " {target}/release/*.dylib"
+            " resources".format(target=target_dir),
         ]))
         .with_artifacts("repo/target.tar.gz")
-        .find_or_create("build.macos_x64_release_w_assertions." + CONFIG.tree_hash())
+        .find_or_create("build.macos_x64%s_release_w_assertions.%s" % (
+            index_key_suffix,
+            CONFIG.tree_hash(),
+        ))
     )
 
 
-def linux_release_build_with_debug_assertions(layout_2020):
+def linux_release_build_with_debug_assertions(layout_2020, asan_target=None):
     if layout_2020:
         name_prefix = "Layout 2020 "
         build_args = "--with-layout-2020"
@@ -514,6 +534,16 @@ def linux_release_build_with_debug_assertions(layout_2020):
         build_args = ""
         index_key_suffix = ""
         treeherder_prefix = ""
+
+    if asan_target:
+        name_prefix += "ASAN "
+        build_args += " --with-asan"
+        index_key_suffix += "_asan"
+        treeherder_prefix += "asan-"
+        target_dir = "target/" + asan_target
+    else:
+        target_dir = "target"
+
     return (
         linux_build_task(name_prefix + "Release build, with debug assertions")
         .with_treeherder("Linux x64", treeherder_prefix + "Release+A")
@@ -523,10 +553,10 @@ def linux_release_build_with_debug_assertions(layout_2020):
             ./mach build --release --with-debug-assertions %s -p servo
             ./etc/ci/lockfile_changed.sh
             tar -czf /target.tar.gz \
-                target/release/servo \
+                %s/release/servo \
                 resources
             sccache --show-stats
-        """ % build_args)
+        """ % (build_args, target_dir))
         .with_artifacts("/target.tar.gz")
         .find_or_create("build.linux_x64%s_release_w_assertions.%s" % (
             index_key_suffix,
@@ -535,9 +565,13 @@ def linux_release_build_with_debug_assertions(layout_2020):
     )
 
 
-def macos_wpt():
+def macos_wpt_asan():
+    return macos_wpt(asan_target="x86_64-apple-darwin")
+
+
+def macos_wpt(asan_target=None):
     priority = "high" if CONFIG.git_ref == "refs/heads/auto" else None
-    build_task = macos_release_build_with_debug_assertions(priority=priority)
+    build_task = macos_release_build_with_debug_assertions(priority=priority, asan_target=asan_target)
     def macos_run_task(name):
         task = macos_task(name).with_python2().with_python3() \
             .with_repo_bundle(alternate_object_dir="/var/cache/servo.git/objects")
@@ -549,7 +583,12 @@ def macos_wpt():
         repo_dir="repo",
         total_chunks=20,
         processes=8,
+        asan_target=asan_target,
     )
+
+
+def linux_wpt_asan():
+    linux_wpt_common(total_chunks=4, layout_2020=False, asan_target="x86_64-unknown-linux-gnu")
 
 
 def linux_wpt():
@@ -560,16 +599,17 @@ def linux_wpt_layout_2020():
     linux_wpt_common(total_chunks=2, layout_2020=True)
 
 
-def linux_wpt_common(total_chunks, layout_2020):
-    release_build_task = linux_release_build_with_debug_assertions(layout_2020)
+def linux_wpt_common(total_chunks, layout_2020, asan_target=None):
+    release_build_task = linux_release_build_with_debug_assertions(layout_2020, asan_target)
     def linux_run_task(name):
         return linux_task(name).with_dockerfile(dockerfile_path("run")).with_repo_bundle()
     wpt_chunks("Linux x64", linux_run_task, release_build_task, repo_dir="/repo",
-               processes=20, total_chunks=total_chunks, layout_2020=layout_2020)
+               processes=20, total_chunks=total_chunks, layout_2020=layout_2020,
+               asan_target=asan_target)
 
 
 def wpt_chunks(platform, make_chunk_task, build_task, total_chunks, processes,
-               repo_dir, chunks="all", layout_2020=False):
+               repo_dir, chunks="all", layout_2020=False, asan_target=None):
     if layout_2020:
         start = 1  # Skip the "extra" WPT testing, a.k.a. chunk 0
         name_prefix = "Layout 2020 "
@@ -580,6 +620,11 @@ def wpt_chunks(platform, make_chunk_task, build_task, total_chunks, processes,
         name_prefix = ""
         job_id_prefix = ""
         args = []
+
+    if asan_target:
+        name_prefix += "ASAN "
+        job_id_prefix += "asan-"
+        args += ["--target", asan_target, "--timeout-multiplier=4"]
 
     # Our Mac CI runs on machines with an Intel 4000 GPU, so need to work around
     # https://github.com/servo/webrender/wiki/Driver-issues#bug-1570736---texture-swizzling-affects-wrap-modes-on-some-intel-gpus
@@ -619,30 +664,30 @@ def wpt_chunks(platform, make_chunk_task, build_task, total_chunks, processes,
         # https://github.com/servo/servo/issues/22438
         if this_chunk == 0:
             task.with_script("""
-                time python ./mach test-wpt --release --binary-arg=--multiprocess \
+                time python ./mach test-wpt $WPT_ARGS --release --binary-arg=--multiprocess \
                     --processes $PROCESSES \
                     --log-raw test-wpt-mp.log \
                     --log-errorsummary wpt-mp-errorsummary.log \
                     eventsource \
                     | cat
-                time env PYTHONIOENCODING=utf-8 python3 ./mach test-wpt --release \
+                time env PYTHONIOENCODING=utf-8 python3 ./mach test-wpt $WPT_ARGS  --release \
                     --processes $PROCESSES \
                     --log-raw test-wpt-py3.log \
                     --log-errorsummary wpt-py3-errorsummary.log \
                     url \
                     | cat
-                time ./mach test-wpt --release --product=servodriver --headless  \
+                time ./mach test-wpt $WPT_ARGS --release --product=servodriver --headless  \
                     tests/wpt/mozilla/tests/mozilla/DOMParser.html \
                     tests/wpt/mozilla/tests/css/per_glyph_font_fallback_a.html \
                     tests/wpt/mozilla/tests/css/img_simple.html \
                     tests/wpt/mozilla/tests/mozilla/secure.https.html \
                     | cat
-                time ./mach test-wpt --release --processes $PROCESSES --product=servodriver \
+                time ./mach test-wpt $WPT_ARGS --release --processes $PROCESSES --product=servodriver \
                     --headless --log-raw test-bluetooth.log \
                     --log-errorsummary bluetooth-errorsummary.log \
                     bluetooth \
                     | cat
-                time ./mach test-wpt --release --processes $PROCESSES --timeout-multiplier=4 \
+                time ./mach test-wpt $WPT_ARGS --release --processes $PROCESSES --timeout-multiplier=4 \
                     --headless --log-raw test-wdspec.log \
                     --log-servojson wdspec-jsonsummary.log \
                     --always-succeed \
