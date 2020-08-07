@@ -137,7 +137,7 @@ impl FontTemplateData {
     /// Returns a clone of the data in this font. This may be a hugely expensive
     /// operation (depending on the platform) which performs synchronous disk I/O
     /// and should never be done lightly.
-    pub fn bytes(&self) -> Vec<u8> {
+    pub fn bytes(&self) -> Arc<Vec<u8>> {
         if let Some(font_data) = self.bytes_if_in_memory() {
             return font_data;
         }
@@ -168,17 +168,16 @@ impl FontTemplateData {
             .expect("Couldn't open font file!")
             .read_to_end(&mut bytes)
             .unwrap();
+
+        let bytes = Arc::new(bytes);
+        *self.font_data.write().unwrap() = Some(bytes.clone());
         bytes
     }
 
     /// Returns a clone of the bytes in this font if they are in memory. This function never
     /// performs disk I/O.
-    pub fn bytes_if_in_memory(&self) -> Option<Vec<u8>> {
-        self.font_data
-            .read()
-            .unwrap()
-            .as_ref()
-            .map(|bytes| (**bytes).clone())
+    pub fn bytes_if_in_memory(&self) -> Option<Arc<Vec<u8>>> {
+        self.font_data.read().unwrap().as_ref().map(Arc::clone)
     }
 
     /// Returns the native font that underlies this font template, if applicable.
