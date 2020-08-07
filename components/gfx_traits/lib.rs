@@ -105,7 +105,7 @@ pub fn node_id_from_scroll_id(id: usize) -> Option<usize> {
 }
 
 pub enum FontData {
-    Raw(Vec<u8>),
+    Raw(std::sync::Arc<Vec<u8>>),
     Native(webrender_api::NativeFontHandle),
 }
 

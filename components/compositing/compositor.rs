@@ -692,7 +692,7 @@ impl<Window: WindowMethods + ?Sized> IOCompositor<Window> {
                 let font_key = self.webrender_api.generate_font_key();
                 let mut txn = webrender_api::Transaction::new();
                 match data {
-                    FontData::Raw(bytes) => txn.add_raw_font(font_key, bytes, 0),
+                    FontData::Raw(bytes) => txn.add_raw_font(font_key, (*bytes).clone(), 0),
                     FontData::Native(native_font) => txn.add_native_font(font_key, native_font),
                 }
                 self.webrender_api
