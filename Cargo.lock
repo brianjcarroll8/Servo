@@ -1129,7 +1129,7 @@ dependencies = [
  "proc-macro2 1.0.17",
  "quote 1.0.2",
  "serde",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "syn",
 ]
 
@@ -1561,7 +1561,7 @@ name = "fallible"
 version = "0.0.1"
 dependencies = [
  "hashglobe",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
 ]
 
 [[package]]
@@ -1943,7 +1943,7 @@ dependencies = [
  "parking_lot 0.11.0",
  "range-alloc",
  "raw-window-handle",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "spirv_cross",
  "winapi",
  "wio",
@@ -1962,7 +1962,7 @@ dependencies = [
  "log",
  "range-alloc",
  "raw-window-handle",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "spirv_cross",
  "winapi",
 ]
@@ -1999,7 +1999,7 @@ dependencies = [
  "parking_lot 0.11.0",
  "range-alloc",
  "raw-window-handle",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "spirv_cross",
  "storage-map",
 ]
@@ -2020,7 +2020,7 @@ dependencies = [
  "log",
  "objc",
  "raw-window-handle",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "winapi",
 ]
 
@@ -3216,7 +3216,7 @@ dependencies = [
  "log",
  "servo-egl",
  "simpleservo",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "webxr",
  "webxr-api",
 ]
@@ -3423,7 +3423,7 @@ dependencies = [
  "serde_bytes",
  "servo_arc",
  "smallbitvec",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "string_cache",
  "thin-slice",
  "time",
@@ -4204,7 +4204,7 @@ dependencies = [
  "cloudabi 0.0.3",
  "libc",
  "redox_syscall",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "winapi",
 ]
 
@@ -4219,7 +4219,7 @@ dependencies = [
  "instant",
  "libc",
  "redox_syscall",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "winapi",
 ]
 
@@ -5103,7 +5103,7 @@ dependencies = [
  "phf_codegen",
  "precomputed-hash",
  "servo_arc",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "thin-slice",
  "to_shmem",
  "to_shmem_derive",
@@ -5677,9 +5677,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.4.2"
+version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbee7696b84bbf3d89a1c2eccff0850e3047ed46bfcd2e92c29a2d074d57e252"
+checksum = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e"
 dependencies = [
  "serde",
 ]
@@ -5862,7 +5862,7 @@ dependencies = [
  "servo_config",
  "servo_url",
  "smallbitvec",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "string_cache",
  "style_derive",
  "style_traits",
@@ -6171,7 +6171,7 @@ dependencies = [
  "cssparser",
  "servo_arc",
  "smallbitvec",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "string_cache",
  "thin-slice",
 ]
@@ -6547,7 +6547,7 @@ version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5479532badd04e128284890390c1e876ef7a993d0570b3597ae43dfa1d59afa4"
 dependencies = [
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
 ]
 
 [[package]]
@@ -6933,7 +6933,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sig",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "svg_fmt",
  "time",
  "tracy-rs",
@@ -7046,7 +7046,7 @@ dependencies = [
  "parking_lot 0.11.0",
  "ron 0.6.0",
  "serde",
- "smallvec 1.4.2",
+ "smallvec 1.6.1",
  "thiserror",
  "tracing",
  "wgpu-types",
